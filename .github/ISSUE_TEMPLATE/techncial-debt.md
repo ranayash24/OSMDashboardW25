@@ -1,5 +1,5 @@
 ---
-name: Techncial Debt Template
+name: Techncial Debt
 about: Describe and Remove Technical Debt
 title: ''
 labels: ''
