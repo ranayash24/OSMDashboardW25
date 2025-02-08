@@ -16,7 +16,7 @@ abstract class BaseActivity : AppCompatActivity() {
     val settingsActivityResultLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult<Intent, ActivityResult>(
             StartActivityForResult(),
-            ActivityResultCallback { result: ActivityResult? -> recreate() })
+            ActivityResultCallback { _: ActivityResult? -> recreate() })
 
     @Suppress("unused")
     fun openSettings(view: View?) {
