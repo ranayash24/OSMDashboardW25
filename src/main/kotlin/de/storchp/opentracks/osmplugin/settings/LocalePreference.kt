@@ -50,8 +50,8 @@ class LocalePreference : ListPreference {
             Locale.getDefault().displayName
         )
 
-        // All available options
-        val supportedLocales = getLocaleListCompat()
+        val supportedLocales = AppCompatDelegate.getApplicationLocales()
+
 
         val localeItemsSorted = buildList {
             for (i in 0 until supportedLocales.size()) {
@@ -96,39 +96,7 @@ class LocalePreference : ListPreference {
     // TODO Get this functionality from any Androidx compat library: should be in LocaleListCompat or LocaleManagerCompat
     // 2024-12-12: on Android 14-: LocaleManagerCompat.getApplicationLocales(getContext()) returned "[]"
     // See: https://stackoverflow.com/questions/78116375/per-app-language-preferences-get-list-of-apps-available-language-programmatic
-    @Deprecated("")
-    private fun getLocaleListCompat(): LocaleList {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            return LocaleConfig.fromContextIgnoringOverride(context).supportedLocales
-                ?: LocaleList.getEmptyLocaleList()
-        }
-
-        @android.annotation.SuppressLint("DiscouragedApi")
-        val localesConfigId =
-            context.resources.getIdentifier(
-                "_generated_res_locale_config",
-                "xml",
-                context.packageName
-            )
-
-        val locales = buildList {
-            try {
-                val xpp = context.resources.getXml(localesConfigId)
-                while (xpp.eventType != XmlPullParser.END_DOCUMENT) {
-                    if (xpp.eventType == XmlPullParser.START_TAG) {
-                        if ("locale" == xpp.name && xpp.attributeCount > 0
-                            && xpp.getAttributeName(0) == "name"
-                        ) {
-                            add(xpp.getAttributeValue(0))
-                        }
-                    }
-                    xpp.next()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Could not load locales: " + e.message)
-            }
-        }.joinToString(",")
-
-        return LocaleList.forLanguageTags(locales)
+    private fun getLocaleListCompat(): LocaleListCompat {
+        return AppCompatDelegate.getApplicationLocales()
     }
 }
