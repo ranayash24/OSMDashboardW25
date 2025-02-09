@@ -1026,14 +1026,7 @@
                         stipple-width="0.8" stroke="#aaa6a4" width="2.0" />
                 </m>
 
-                <!-- <m v="rail" zoom-max="14" zoom-min="13">
-                  <line stroke="#8888aa" width="0.6" cap="butt"
-                  fix="true" />
-                  </m> -->
-                <!-- <m v="rail" zoom-max="13" zoom-min="11">
-                  <line stroke="#bbbbcc" width="0.8" cap="butt" fix="true" />
-                  </m> -->
-                <!-- whatever railway:spur means ... -->
+                
                 <m v="disused|spur|abandoned|preserved">
                     <line cap="butt" fade="12" fix="true" stroke="#cccccc" width="0.8" />
                 </m>
