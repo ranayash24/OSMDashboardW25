@@ -103,53 +103,61 @@ class DownloadActivity : BaseActivity() {
             )
             downloadUri = uri
 
-            if (MF_V4_MAP_SCHEME == scheme) {
-                if (host == "download.openandromaps.org" && path!!.startsWith("/mapsV4/") && path.endsWith(
-                        ".zip"
-                    )
-                ) {
-                    // OpenAndroMaps URIs need to be remapped - mf-v4-map://download.openandromaps.org/mapsV4/Germany/bayern.zip
-                    downloadUri = Uri.parse(
-                        OPENANDROMAPS_MAP_DOWNLOAD_URL + path.substring(
-                            8
+            when {
+                MF_V4_MAP_SCHEME == scheme -> {
+                    if (host == "download.openandromaps.org" && path!!.startsWith("/mapsV4/") && path.endsWith(
+                            ".zip"
                         )
-                    )
-                    downloadType = DownloadType.MAP_ZIP
-                } else {
-                    // try to replace MF_V4_MAP_SCHEME with https for unknown sources
-                    downloadUri = uri.buildUpon().scheme("https").build()
-                    downloadType =
-                        if (path!!.endsWith(".zip")) DownloadType.MAP_ZIP else DownloadType.MAP
-                }
-            } else if (MF_THEME_SCHEME == scheme) {
-                downloadUri =
-                    if (host == "download.openandromaps.org" && path!!.startsWith("/themes/")
-                        && path.endsWith(".zip")
                     ) {
-                        // no remapping, as they have themes only on their homepage, not on their ftp site
-                        Uri.parse(
-                            OPENANDROMAPS_THEME_DOWNLOAD_URL + path.substring(
-                                8
-                            )
+                        // OpenAndroMaps URIs need to be remapped - mf-v4-map://download.openandromaps.org/mapsV4/Germany/bayern.zip
+                        downloadUri = Uri.parse(
+                            OPENANDROMAPS_MAP_DOWNLOAD_URL + path.substring(8)
                         )
+                        downloadType = DownloadType.MAP_ZIP
                     } else {
-                        // try to replace MF_THEME_SCHEME with https for unknown sources
-                        uri.buildUpon().scheme("https").build()
+                        // try to replace MF_V4_MAP_SCHEME with https for unknown sources
+                        downloadUri = uri.buildUpon().scheme("https").build()
+                        downloadType =
+                            if (path!!.endsWith(".zip")) DownloadType.MAP_ZIP else DownloadType.MAP
                     }
-                downloadType = DownloadType.THEME
-                binding.toolbar.mapsToolbar.setTitle(R.string.download_theme)
-            } else if (FREIZEITKARTE_HOST == host) {
-                if (path!!.endsWith(".map.zip")) {
-                    downloadType = DownloadType.MAP_ZIP
-                } else if (path.endsWith(".zip")) {
+                }
+
+                MF_THEME_SCHEME == scheme -> {
+                    downloadUri =
+                        if (host == "download.openandromaps.org" && path!!.startsWith("/themes/") && path.endsWith(
+                                ".zip"
+                            )
+                        ) {
+                            // no remapping, as they have themes only on their homepage, not on their ftp site
+                            Uri.parse(
+                                OPENANDROMAPS_THEME_DOWNLOAD_URL + path.substring(8)
+                            )
+                        } else {
+                            // try to replace MF_THEME_SCHEME with https for unknown sources
+                            uri.buildUpon().scheme("https").build()
+                        }
                     downloadType = DownloadType.THEME
                     binding.toolbar.mapsToolbar.setTitle(R.string.download_theme)
                 }
-            } else if (OPENANDROMAPS_MAP_HOST == host && path!!.endsWith(".zip")) {
-                downloadType = DownloadType.MAP_ZIP
-            } else if (OPENANDROMAPS_THEME_HOST == host && path!!.endsWith(".zip")) {
-                downloadType = DownloadType.THEME
+
+                FREIZEITKARTE_HOST == host -> {
+                    if (path!!.endsWith(".map.zip")) {
+                        downloadType = DownloadType.MAP_ZIP
+                    } else if (path.endsWith(".zip")) {
+                        downloadType = DownloadType.THEME
+                        binding.toolbar.mapsToolbar.setTitle(R.string.download_theme)
+                    }
+                }
+
+                OPENANDROMAPS_MAP_HOST == host && path!!.endsWith(".zip") -> {
+                    downloadType = DownloadType.MAP_ZIP
+                }
+
+                OPENANDROMAPS_THEME_HOST == host && path!!.endsWith(".zip") -> {
+                    downloadType = DownloadType.THEME
+                }
             }
+
 
             Log.i(TAG, "downloadUri=$downloadUri, downloadType=$downloadType")
 
