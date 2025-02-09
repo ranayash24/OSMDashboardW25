@@ -219,7 +219,7 @@ class DownloadActivity : BaseActivity() {
                 .setMessage(getString(downloadType.overwriteMessageId, filename))
                 .setPositiveButton(
                     android.R.string.ok,
-                    DialogInterface.OnClickListener { dialog: DialogInterface?, which: Int ->
+                    DialogInterface.OnClickListener { dialog: DialogInterface?, _: Int ->
                         file.toFile().delete()
                         dialog!!.dismiss()
                         startDownload()
