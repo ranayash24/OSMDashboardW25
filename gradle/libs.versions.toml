@@ -9,6 +9,7 @@ constraintlayout = "2.2.0"
 desugar_jdk_libs = "2.1.5"
 documentfile = "1.0.1"
 junitJupiter = "5.12.0"
+junitPlatformLauncher = "1.12.0"
 kotlin = "2.1.10"
 lifecycleViewmodelKtx = "2.8.7"
 mapsforge = "0.23.0"
@@ -34,6 +35,7 @@ jsoup-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junitJupiter" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junitJupiter" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatformLauncher" }
 lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
