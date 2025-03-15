@@ -43,25 +43,13 @@ class TrackpointReaderTest {
     }
 
     /**
-     * Helper function to validate trackpoints and avoid duplication.
+     * Helper function to validate trackpoints.
      */
-    private fun validateTrackpoints(
-        trackpoints: List<List<Trackpoint>>,
-        expectedDebug: TrackpointsDebug,
-        segments: Int
-    ) {
+    private fun validateTrackpointsResult(trackpoints: List<List<Trackpoint>>) {
         assertThat(trackpoints).hasSize(1)
         assertThat(trackpoints[0]).hasSize(2)
         assertThat(trackpoints[0][0]).isEqualTo(trackpoint1)
         assertThat(trackpoints[0][1]).isEqualTo(trackpoint2)
-        assertThat(trackpoints.debug).isEqualTo(
-            TrackpointsDebug(
-                trackpointsReceived = expectedDebug.trackpointsReceived,
-                trackpointsInvalid = expectedDebug.trackpointsInvalid,
-                trackpointsPause = expectedDebug.trackpointsPause,
-                segments = segments,
-            )
-        )
     }
 
     @Test
@@ -86,7 +74,16 @@ class TrackpointReaderTest {
         every { cursor.getDouble(6) } returnsMany listOf(trackpoint1.speed!!, trackpoint2.speed!!, 0.0)
 
         val trackpoints = TrackpointReader.readTrackpointsBySegments(contentResolver, testUri, 1, 1)
-        validateTrackpoints(trackpoints, TrackpointsDebug(3, 1, 1, 1), 1)
+
+        validateTrackpointsResult(trackpoints)
+        assertThat(trackpoints.debug).isEqualTo(
+            TrackpointsDebug(
+                trackpointsReceived = 3,
+                trackpointsInvalid = 1,
+                trackpointsPause = 1,
+                segments = 1,
+            )
+        )
     }
 
     @Test
@@ -112,12 +109,18 @@ class TrackpointReaderTest {
         every { cursor.getInt(7) } returnsMany listOf(trackpoint1.type, trackpoint2.type, TRACKPOINT_TYPE_TRACKPOINT)
 
         val trackpoints = TrackpointReader.readTrackpointsBySegments(contentResolver, testUri, 1, 2)
-        validateTrackpoints(trackpoints, TrackpointsDebug(3, 1, 1, 1), 1)
+
+        validateTrackpointsResult(trackpoints)
+        assertThat(trackpoints.debug).isEqualTo(
+            TrackpointsDebug(
+                trackpointsReceived = 3,
+                trackpointsInvalid = 1,
+                trackpointsPause = 1,
+                segments = 1,
+            )
+        )
     }
 
-    /**
-     * Creates a mock Trackpoint for testing.
-     */
     private fun createTrackpoint() = Trackpoint(
         id = 2L,
         trackId = 1L,
