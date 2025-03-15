@@ -317,6 +317,21 @@ class DownloadActivity : BaseActivity() {
                 }
         }
     }
+    private fun extractMapFile(inputStream: InputStream, outputProvider: (String) -> OutputStream) {
+        ZipInputStream(inputStream).use { zis ->
+            var ze: ZipEntry?
+            while (zis.nextEntry.also { ze = it } != null) {
+                val filename = ze!!.name
+                if (filename.endsWith(".map")) {
+                    outputProvider(filename).use { os ->
+                        copy(zis, os)
+                    }
+                    break
+                }
+            }
+        }
+    }
+
 
     private fun downloadEnded(downloadedUri: Uri) {
         executor.shutdown()
@@ -326,20 +341,14 @@ class DownloadActivity : BaseActivity() {
             if (downloadType.extractMapFromZIP) {
                 try {
                     contentResolver.openInputStream(downloadedUri).use { inputStream ->
-                        val zis = ZipInputStream(inputStream)
-                        var ze: ZipEntry? = null
-                        var foundMapInZip = false
-                        while (!foundMapInZip && (zis.getNextEntry().also { ze = it }) != null) {
-                            val filename = ze!!.name
-                            if (filename.endsWith(".map")) {
-                                val downloadedFile = File(downloadedUri.path!!)
-                                val targetFile = File(downloadedFile.getParent(), filename)
-                                copy(zis, FileOutputStream(targetFile))
-                                foundMapInZip = true
-                            }
+                        extractMapFile(inputStream!!) { filename ->
+                            val downloadedFile = File(downloadedUri.path!!)
+                            val targetFile = File(downloadedFile.parent, filename)
+                            FileOutputStream(targetFile)
                         }
                     }
-                } catch (e: Exception) {
+
+                    } catch (e: Exception) {
                     throw RuntimeException(e)
                 } finally {
                     File(downloadedUri.path!!).delete()
@@ -349,24 +358,14 @@ class DownloadActivity : BaseActivity() {
             try {
                 contentResolver.openInputStream(downloadedUri).use { inputStream ->
                     if (downloadType.extractMapFromZIP) {
-                        val zis = ZipInputStream(inputStream)
-                        var ze: ZipEntry? = null
-                        var foundMapInZip = false
-                        while (!foundMapInZip && (zis.getNextEntry().also { ze = it }) != null) {
-                            val filename = ze!!.name
-                            if (filename.endsWith(".map")) {
-                                val targetFile =
-                                    createBinaryDocumentFile(this, destinationDir, filename)
-                                copy(
-                                    zis,
-                                    contentResolver.openOutputStream(
-                                        targetFile.uri,
-                                        "wt"
-                                    )!!
-                                )
-                                foundMapInZip = true
+                        inputStream?.let { nonNullStream ->
+                            extractMapFile(nonNullStream) { filename ->
+                                val downloadedFile = File(downloadedUri.path!!)
+                                val targetFile = File(downloadedFile.parent, filename)
+                                FileOutputStream(targetFile)
                             }
                         }
+
                     } else {
                         val filename = downloadedUri.lastPathSegment
                         val targetFile = createBinaryDocumentFile(this, destinationDir, filename!!)
