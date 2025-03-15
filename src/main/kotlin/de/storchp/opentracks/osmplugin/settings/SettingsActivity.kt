@@ -13,6 +13,7 @@ import androidx.preference.Preference
 import androidx.preference.Preference.SummaryProvider
 import androidx.preference.PreferenceFragmentCompat
 import de.storchp.opentracks.osmplugin.BuildConfig
+import de.storchp.opentracks.osmplugin.MainActivity
 import de.storchp.opentracks.osmplugin.R
 import de.storchp.opentracks.osmplugin.databinding.ActivitySettingsBinding
 import de.storchp.opentracks.osmplugin.download.MAPS_V_5_DOWNLOAD_URI
@@ -25,14 +26,10 @@ class SettingsActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val binding = ActivitySettingsBinding.inflate(layoutInflater)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot()) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.updateLayoutParams<MarginLayoutParams> {
-                bottomMargin = insets.bottom
-                topMargin = insets.top
-            }
-            WindowInsetsCompat.CONSUMED
-        }
+
+        // Cling the applyInsets function from the MainActivity file
+        MainActivity.applyInsets(binding.root)
+
         setContentView(binding.getRoot())
 
         supportFragmentManager
