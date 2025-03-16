@@ -49,26 +49,31 @@ object StringUtils {
         )
 
     fun formatPaceMinPerKm(context: Context, meterPerSeconds: Double): String {
-        if (meterPerSeconds == 0.0) {
-            return "0:00"
-        }
-        val kmPerSecond = meterPerSeconds / UnitConversions.KM_TO_M.toFloat()
-        val secondsPerKm = (1 / kmPerSecond).toInt()
-        val minutes = (secondsPerKm / UnitConversions.MIN_TO_S).toInt()
-        val seconds = secondsPerKm % UnitConversions.MIN_TO_S.toInt()
-
-        return context.getString(
-            R.string.stat_distance_with_unit,
-            context.getString(R.string.stat_minute_seconds, minutes, seconds),
-            context.getString(R.string.unit_minute_per_kilometer)
+        return formatPace(
+            context, 
+            meterPerSeconds, 
+            context.getString(R.string.unit_minute_per_kilometer),
+            1.0 // No conversion needed for kilometers
         )
     }
 
     fun formatPaceMinPerMi(context: Context, meterPerSeconds: Double): String {
+        return formatPace(
+            context, 
+            meterPerSeconds, 
+            context.getString(R.string.unit_minute_per_mile),
+            UnitConversions.KM_TO_MI // Conversion from kilometers to miles
+        )
+    }
+
+    /**
+     * Common method for formatting pace.
+     */
+    private fun formatPace(context: Context, meterPerSeconds: Double, unit: String, conversionFactor: Double): String {
         if (meterPerSeconds == 0.0) {
             return "0:00"
         }
-        val kmPerSecond = (meterPerSeconds / UnitConversions.KM_TO_M) * UnitConversions.KM_TO_MI
+        val kmPerSecond = (meterPerSeconds / UnitConversions.KM_TO_M) * conversionFactor
         val secondsPerKm = (1 / kmPerSecond).toInt()
         val minutes = (secondsPerKm / UnitConversions.MIN_TO_S).toInt()
         val seconds = secondsPerKm % UnitConversions.MIN_TO_S.toInt()
@@ -76,7 +81,7 @@ object StringUtils {
         return context.getString(
             R.string.stat_distance_with_unit,
             context.getString(R.string.stat_minute_seconds, minutes, seconds),
-            context.getString(R.string.unit_minute_per_mile)
+            unit
         )
     }
 
