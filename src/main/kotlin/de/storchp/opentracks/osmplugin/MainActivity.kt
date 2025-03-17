@@ -13,28 +13,18 @@ import androidx.core.view.updateLayoutParams
 import de.storchp.opentracks.osmplugin.databinding.ActivityMainBinding
 
 class MainActivity : BaseActivity() {
-    // New function which was cloned
-    companion object {
-        fun applyInsets(view: View) {
-            ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
-                val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-                v.updateLayoutParams<MarginLayoutParams> {
-                    bottomMargin = insets.bottom
-                    topMargin = insets.top
-                }
-                WindowInsetsCompat.CONSUMED
-            }
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val binding = ActivityMainBinding.inflate(layoutInflater)
-
-        // Calling the function applyInsets() from this file
-        applyInsets(binding.root)
-
+        ViewCompat.setOnApplyWindowInsetsListener(binding.getRoot()) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.updateLayoutParams<MarginLayoutParams> {
+                bottomMargin = insets.bottom
+                topMargin = insets.top
+            }
+            WindowInsetsCompat.CONSUMED
+        }
         setContentView(binding.getRoot())
 
         binding.usageInfo.movementMethod = LinkMovementMethod.getInstance()
