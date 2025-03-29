@@ -1,6 +1,7 @@
 package de.storchp.opentracks.osmplugin.map
 
 import android.app.PictureInPictureParams
+import android.content.ContentResolver
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -30,6 +31,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updateLayoutParams
 import androidx.documentfile.provider.DocumentFile
+import androidx.fragment.app.Fragment
 import de.storchp.opentracks.osmplugin.BaseActivity
 import de.storchp.opentracks.osmplugin.BuildConfig
 import de.storchp.opentracks.osmplugin.R
@@ -313,6 +315,30 @@ open class MapsActivity : BaseActivity(), OnItemGestureListener<MarkerInterface>
         binding.map.mapView.isClickable = true
     }
 
+
+    private fun createZipRenderTheme(
+        contentResolver: ContentResolver,
+        themeFileUri: Uri,
+        fragment: String?
+    ): ZipRenderTheme {
+        var uri = themeFileUri
+        if (fragment != null) {
+            uri = uri.buildUpon().fragment(null).build()
+        } else {
+            throw RuntimeException("Fragment missing, which indicates the theme inside the zip file")
+        }
+        return ZipRenderTheme(
+            fragment,
+            ZipXmlThemeResourceProvider(
+                ZipInputStream(
+                    BufferedInputStream(
+                        contentResolver.openInputStream(uri)
+                    )
+                )
+            )
+        )
+    }
+
     protected fun getRenderTheme(): ThemeFile? {
         val mapTheme = PreferencesUtils.getMapThemeUri()
         if (mapTheme == null) {
@@ -324,21 +350,7 @@ open class MapsActivity : BaseActivity(), OnItemGestureListener<MarkerInterface>
                 if (themeFile.exists() && themeFile.getName().endsWith(".zip")) {
                     var themeFileUri = Uri.fromFile(themeFile)
                     val fragment = mapTheme.fragment
-                    if (fragment != null) {
-                        themeFileUri = themeFileUri.buildUpon().fragment(null).build()
-                    } else {
-                        throw RuntimeException("Fragment missing, which indicates the theme inside the zip file")
-                    }
-                    return ZipRenderTheme(
-                        fragment,
-                        ZipXmlThemeResourceProvider(
-                            ZipInputStream(
-                                BufferedInputStream(
-                                    contentResolver.openInputStream(themeFileUri)
-                                )
-                            )
-                        )
-                    )
+                    return createZipRenderTheme(contentResolver,themeFileUri,fragment)
                 }
                 return StreamRenderTheme("/assets/", FileInputStream(themeFile))
             } else {
@@ -351,21 +363,7 @@ open class MapsActivity : BaseActivity(), OnItemGestureListener<MarkerInterface>
                     ).endsWith(".zip")
                 ) {
                     val fragment = themeFileUri.fragment
-                    if (fragment != null) {
-                        themeFileUri = themeFileUri.buildUpon().fragment(null).build()
-                    } else {
-                        throw RuntimeException("Fragment missing, which indicates the theme inside the zip file")
-                    }
-                    return ZipRenderTheme(
-                        fragment,
-                        ZipXmlThemeResourceProvider(
-                            ZipInputStream(
-                                BufferedInputStream(
-                                    contentResolver.openInputStream(themeFileUri)
-                                )
-                            )
-                        )
-                    )
+                    return createZipRenderTheme(contentResolver,themeFileUri,fragment)
                 }
                 return StreamRenderTheme(
                     "/assets/",
