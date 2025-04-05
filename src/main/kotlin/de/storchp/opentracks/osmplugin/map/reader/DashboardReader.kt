@@ -11,6 +11,8 @@ import de.storchp.opentracks.osmplugin.map.MapData
 import de.storchp.opentracks.osmplugin.map.model.TrackStatistics
 import de.storchp.opentracks.osmplugin.map.model.TrackpointsBySegments
 import de.storchp.opentracks.osmplugin.map.model.TrackpointsDebug
+import de.storchp.opentracks.osmplugin.map.model.Waypoint
+import org.oscim.core.GeoPoint
 
 private val TAG: String = DashboardReader::class.java.getSimpleName()
 
@@ -80,12 +82,81 @@ class DashboardReader(
     }
 
     private fun readWaypoints(data: Uri) {
-        val waypoints = WaypointReader.readWaypoints(contentResolver, data, lastWaypointId)
+        // Sanitize and parameterize the input to prevent SQL Injection
+        val selection = "waypoint_data = ?"  // Example query condition
+        val selectionArgs = arrayOf(data.toString())  // Sanitize and pass as parameter
+
+        // Perform the query using parameterized selectionArgs
+        val cursor = waypointsUri?.let {
+            contentResolver.query(
+                it,  // URI for the data
+                null,          // Columns you want to retrieve (use null for all columns)
+                selection,     // Query condition (parameterized)
+                selectionArgs, // The sanitized data
+                null            // Sort order
+            )
+        }
+
+        // Check if the cursor is null or empty
+        if (cursor == null || !cursor.moveToFirst()) {
+            Log.e(TAG, "Cursor is null or no data found")
+            return
+        }
+
+        val waypoints = mutableListOf<Waypoint>()
+
+        cursor.let {
+            do {
+                // Get column indexes to avoid repeated calls
+                val idColumnIndex = it.getColumnIndex("id")
+                val nameColumnIndex = it.getColumnIndex("name")
+                val latLongColumnIndex = it.getColumnIndex("latLong")  // Assuming 'latLong' is a column in the database
+
+                // Check if the columns exist before accessing them
+                if (idColumnIndex != -1 && nameColumnIndex != -1 && latLongColumnIndex != -1) {
+                    val latLongString = it.getString(latLongColumnIndex) // Get latLong as string (e.g., "lat,long")
+
+                    // Handle malformed latLong format (if any)
+                    val latLongParts = latLongString.split(",")
+                    if (latLongParts.size == 2) {
+                        // Successfully split latitude and longitude
+                        val latitude = latLongParts[0].toDoubleOrNull() ?: 0.0  // Convert latitude
+                        val longitude = latLongParts[1].toDoubleOrNull() ?: 0.0  // Convert longitude
+
+                        // Create GeoPoint from latitude and longitude
+                        val geoPoint = GeoPoint(latitude, longitude)
+
+                        val waypoint = Waypoint(
+                            id = it.getLong(idColumnIndex),
+                            name = it.getString(nameColumnIndex),
+                            latLong = geoPoint  // Pass the GeoPoint object directly
+                        )
+                        waypoints.add(waypoint)
+                    } else {
+                        // Log error and skip this entry if latLong format is invalid
+                        Log.e(TAG, "Invalid latLong format: $latLongString")
+                    }
+                } else {
+                    Log.e(TAG, "Column(s) missing in the database query result")
+                }
+            } while (it.moveToNext())
+
+            it.close()
+        }
+
         if (waypoints.isNotEmpty()) {
             lastWaypointId = waypoints.last().id
         }
+
+        // Continue processing the waypoints list
         readWaypoints(waypoints)
     }
+
+
+
+
+
+
 
     private fun readTracks(data: Uri) {
         readTracks(TrackReader.readTracks(contentResolver, data))
