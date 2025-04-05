@@ -48,71 +48,64 @@ object TrackReader {
     /**
      * Reads the Tracks from the Content Uri
      */
-fun readTracks(
-    resolver: ContentResolver,
-    data: Uri,
-    categoryFilter: String? = null 
-) = buildList {
-    try {
-    
-        val selection: String? = categoryFilter?.let { "$CATEGORY = ?" }
-        val selectionArgs: Array<String>? = categoryFilter?.let { arrayOf(it) }
-        
-        resolver.query(data, PROJECTION, selection, selectionArgs, null)?.use { cursor ->
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(cursor.getColumnIndexOrThrow(ID))
-                val trackname = cursor.getString(cursor.getColumnIndexOrThrow(NAME))
-                val description = cursor.getString(cursor.getColumnIndexOrThrow(DESCRIPTION))
-                val category = cursor.getString(cursor.getColumnIndexOrThrow(CATEGORY))
-                val startTimeEpochMillis =
-                    cursor.getLong(cursor.getColumnIndexOrThrow(STARTTIME))
-                val stopTimeEpochMillis =
-                    cursor.getLong(cursor.getColumnIndexOrThrow(STOPTIME))
-                val totalDistanceMeter =
-                    cursor.getDouble(cursor.getColumnIndexOrThrow(TOTALDISTANCE))
-                val totalTimeMillis =
-                    cursor.getLong(cursor.getColumnIndexOrThrow(TOTALTIME))
-                val movingTimeMillis =
-                    cursor.getLong(cursor.getColumnIndexOrThrow(MOVINGTIME))
-                val avgSpeedMeterPerSecond =
-                    cursor.getDouble(cursor.getColumnIndexOrThrow(AVGSPEED))
-                val avgMovingSpeedMeterPerSecond =
-                    cursor.getDouble(cursor.getColumnIndexOrThrow(AVGMOVINGSPEED))
-                val maxSpeedMeterPerSecond =
-                    cursor.getDouble(cursor.getColumnIndexOrThrow(MAXSPEED))
-                val minElevationMeter =
-                    cursor.getDouble(cursor.getColumnIndexOrThrow(MINELEVATION))
-                val maxElevationMeter =
-                    cursor.getDouble(cursor.getColumnIndexOrThrow(MAXELEVATION))
-                val elevationGainMeter =
-                    cursor.getDouble(cursor.getColumnIndexOrThrow(ELEVATIONGAIN))
+    fun readTracks(resolver: ContentResolver, data: Uri) =
+        buildList {
+            try {
+                resolver.query(data, PROJECTION, null, null, null).use { cursor ->
+                    while (cursor!!.moveToNext()) {
+                        val id = cursor.getLong(cursor.getColumnIndexOrThrow(ID))
+                        val trackname = cursor.getString(cursor.getColumnIndexOrThrow(NAME))
+                        val description =
+                            cursor.getString(cursor.getColumnIndexOrThrow(DESCRIPTION))
+                        val category = cursor.getString(cursor.getColumnIndexOrThrow(CATEGORY))
+                        val startTimeEpochMillis =
+                            cursor.getLong(cursor.getColumnIndexOrThrow(STARTTIME))
+                        val stopTimeEpochMillis =
+                            cursor.getLong(cursor.getColumnIndexOrThrow(STOPTIME))
+                        val totalDistanceMeter =
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(TOTALDISTANCE))
+                        val totalTimeMillis =
+                            cursor.getLong(cursor.getColumnIndexOrThrow(TOTALTIME))
+                        val movingTimeMillis =
+                            cursor.getLong(cursor.getColumnIndexOrThrow(MOVINGTIME))
+                        val avgSpeedMeterPerSecond =
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(AVGSPEED))
+                        val avgMovingSpeedMeterPerSecond =
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(AVGMOVINGSPEED))
+                        val maxSpeedMeterPerSecond =
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(MAXSPEED))
+                        val minElevationMeter =
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(MINELEVATION))
+                        val maxElevationMeter =
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(MAXELEVATION))
+                        val elevationGainMeter =
+                            cursor.getDouble(cursor.getColumnIndexOrThrow(ELEVATIONGAIN))
 
-                add(
-                    Track(
-                        id = id,
-                        name = trackname,
-                        description = description,
-                        category = category,
-                        startTime = Instant.ofEpochMilli(startTimeEpochMillis),
-                        stopTime = Instant.ofEpochMilli(stopTimeEpochMillis),
-                        totalDistanceMeter = totalDistanceMeter,
-                        totalTime = totalTimeMillis.milliseconds,
-                        movingTime = movingTimeMillis.milliseconds,
-                        avgSpeedMeterPerSecond = avgSpeedMeterPerSecond,
-                        avgMovingSpeedMeterPerSecond = avgMovingSpeedMeterPerSecond,
-                        maxSpeedMeterPerSecond = maxSpeedMeterPerSecond,
-                        minElevationMeter = minElevationMeter,
-                        maxElevationMeter = maxElevationMeter,
-                        elevationGainMeter = elevationGainMeter
-                    )
-                )
+                        add(
+                            Track(
+                                id = id,
+                                name = trackname,
+                                description = description,
+                                category = category,
+                                startTime = Instant.ofEpochMilli(startTimeEpochMillis),
+                                stopTime = Instant.ofEpochMilli(stopTimeEpochMillis),
+                                totalDistanceMeter = totalDistanceMeter,
+                                totalTime = totalTimeMillis.milliseconds,
+                                movingTime = movingTimeMillis.milliseconds,
+                                avgSpeedMeterPerSecond = avgSpeedMeterPerSecond,
+                                avgMovingSpeedMeterPerSecond = avgMovingSpeedMeterPerSecond,
+                                maxSpeedMeterPerSecond = maxSpeedMeterPerSecond,
+                                minElevationMeter = minElevationMeter,
+                                maxElevationMeter = maxElevationMeter,
+                                elevationGainMeter = elevationGainMeter
+                            )
+                        )
+                    }
+                }
+            } catch (_: SecurityException) {
+                Log.w(TAG, "No permission to read track")
+            } catch (e: Exception) {
+                Log.e(TAG, "Reading track failed", e)
             }
         }
-    } catch (_: SecurityException) {
-        Log.w(TAG, "No permission to read track")
-    } catch (e: Exception) {
-        Log.e(TAG, "Reading track failed", e)
-    }
-}
-
 }
