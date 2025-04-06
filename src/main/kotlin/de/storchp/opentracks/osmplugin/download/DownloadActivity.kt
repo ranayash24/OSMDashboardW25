@@ -168,14 +168,20 @@ class DownloadActivity : BaseActivity() {
                 registerReceiver(
                     downloadBroadcastReceiver,
                     IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                    "de.storchp.opentracks.osmplugin.permission.DOWNLOAD_COMPLETE",
+                    null,
                     RECEIVER_EXPORTED
                 )
             } else {
+                @Suppress("DEPRECATION")
                 registerReceiver(
                     downloadBroadcastReceiver,
-                    IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+                    IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+                    "de.storchp.opentracks.osmplugin.permission.DOWNLOAD_COMPLETE",
+                    null
                 )
             }
+
 
             startDownload()
         } else {

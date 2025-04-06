@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+>
+    <permission
+            android:name="de.storchp.opentracks.osmplugin.permission.DOWNLOAD_COMPLETE"
+            android:protectionLevel="signature" />
 
     <application
         android:name=".Startup"
